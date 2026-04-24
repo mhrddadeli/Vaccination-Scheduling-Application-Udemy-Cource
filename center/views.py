@@ -1,15 +1,21 @@
 from django.shortcuts import render, reverse
 from django.http import HttpResponseRedirect, Http404
 from django.views import generic
+from django.core.paginator import Paginator
+from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 
 from center.models import Center, Storage
 from center.forms import CenterForm, StorageForm
 
 
 def center_list(request):
-    objects = Center.objects.all()
+    objects = Center.objects.all().order_by("name")
+    paginator = Paginator(objects, 2)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
     context = {
-        "center": objects
+        "page_obj": page_obj
     }
     return render(request, "center/center-list.html", context)
 
@@ -27,7 +33,9 @@ def center_create(request):
         form = CenterForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, "Center Created Successfully.")
             return HttpResponseRedirect(reverse("center:list"))
+        messages.error(request, "Please Enter Valid Data.")
         return render(request, "center/center-create.html", {"form": form})
 
     # GET
@@ -44,10 +52,12 @@ def center_update(request, id):
         raise Http404("Center instance is not found.")
 
     if request.method == "POST":
-        form = CenterForm(instance=center)
+        form = CenterForm(request.POST, instance=center)
         if form.is_valid():
             form.save()
+            messages.success(request, "Center Updated Successfully.")
             return HttpResponseRedirect(reverse("center:detail", kwargs={"id": center.id}))
+        messages.error(request, "Please Enter Valid Data.")
         return render(request, "center/center-update.html", {"form": form})
     # get
     context = {
@@ -64,7 +74,9 @@ def center_delete(request, id):
 
     if request.method == "POST":
         center.delete()
+        messages.success(request, "Center Deleted Successfully.")
         return HttpResponseRedirect(reverse("center:list"))
+
     # get
     context = {
         "center": center
@@ -78,6 +90,8 @@ def center_delete(request, id):
 class StorageList(generic.ListView):
     queryset = Storage.objects.all()
     template_name = "storage/storage-list.html"
+    ordering = ["id"]
+    paginate_by = 3
 
     def get_queryset(self):
         center_id = self.kwargs["center_id"]
@@ -100,10 +114,11 @@ class StorageDetail(generic.DetailView):
         return context
 
 
-class StorageCreate(generic.CreateView):
+class StorageCreate(SuccessMessageMixin, generic.CreateView):
     model = Storage
     form_class = StorageForm
     template_name = "storage/storage-create.html"
+    success_message = "Storage Created Successfully"
 
     # def get_form_kwargs(self):
     #     kwargs = super().get_form_kwargs()
@@ -119,18 +134,20 @@ class StorageCreate(generic.CreateView):
         return reverse("center:storage-list", kwargs={'center_id': self.kwargs["center_id"]})
 
 
-class StorageUpdate(generic.UpdateView):
+class StorageUpdate(SuccessMessageMixin, generic.UpdateView):
     model = Storage
     form_class = StorageForm
     template_name = "storage/storage-update.html"
+    success_message = "Storage Updated Successfully"
 
     def get_success_url(self):
         return reverse("center:storage-list", kwargs={'center_id': self.get_object().center.id})
 
 
-class StorageDelete(generic.DeleteView):
+class StorageDelete(SuccessMessageMixin, generic.DeleteView):
     model = Storage
     template_name = "storage/storage-delete.html"
+    success_message = "Storage Deleted Successfully"
 
     def get_success_url(self):
         return reverse("center:storage-list", kwargs={'center_id': self.get_object().center.id})

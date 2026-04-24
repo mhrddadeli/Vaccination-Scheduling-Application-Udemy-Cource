@@ -2,6 +2,8 @@ from django.shortcuts import render, reverse
 from django.views import View
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator
+from django.contrib import messages
 
 from vaccine.models import Vaccine
 from vaccine.forms import VaccineForm
@@ -9,9 +11,12 @@ from vaccine.forms import VaccineForm
 
 class VaccineList(View):
     def get(self, request):
-        vaccine_list = Vaccine.objects.all()
+        vaccine_list = Vaccine.objects.all().order_by('name')
+        paginator = Paginator(vaccine_list, 2)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
         context = {
-            "objects_list": vaccine_list
+            "page_obj": page_obj
         }
         return render(request, "vaccine/vaccine-list.html", context)
 
@@ -42,7 +47,9 @@ class VaccineCreate(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, "Vaccine Created Successfully.")
             return HttpResponseRedirect(reverse("vaccine:list"))
+        messages.error(request, "Please Enter Valid Data.")
         return render(request, self.template_name, {"form": form})
 
 
@@ -62,7 +69,9 @@ class VaccineUpdate(View):
         form = self.form_class(request.POST, instance=vaccine)
         if form.is_valid():
             form.save()
+            messages.success(request, "Vaccine Updated Successfully.")
             return HttpResponseRedirect(reverse("vaccine:detail", kwargs={"id": vaccine.id}))
+        messages.error(request, "Please Enter Valid Data.")
         return render(request, self.template_name, {"form": form})
 
 
@@ -78,6 +87,7 @@ class VaccineDelete(View):
 
     def post(self, request, id):
         Vaccine.objects.filter(id=id).delete()
+        messages.success(request, "Vaccine Deleted Successfully")
         return HttpResponseRedirect(reverse("vaccine:list"))
 
 
