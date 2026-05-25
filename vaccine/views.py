@@ -4,11 +4,15 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
+from django.utils.decorators import method_decorator
+
 
 from vaccine.models import Vaccine
 from vaccine.forms import VaccineForm
 
 
+@method_decorator(login_required, name='dispatch')
 class VaccineList(View):
     def get(self, request):
         vaccine_list = Vaccine.objects.all().order_by('name')
@@ -20,7 +24,7 @@ class VaccineList(View):
         }
         return render(request, "vaccine/vaccine-list.html", context)
 
-
+@method_decorator(login_required, name='dispatch')
 class VaccineDetail(View):
     def get(self, request, id):
         try:
@@ -32,7 +36,8 @@ class VaccineDetail(View):
         }
         return render(request, "vaccine/vaccine-detail.html", context)
 
-
+@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required("vaccine.add_vaccine", raise_exception=True), name='dispatch')
 class VaccineCreate(View):
     form_class = VaccineForm
     template_name = "vaccine/vaccine-create.html"
@@ -52,7 +57,8 @@ class VaccineCreate(View):
         messages.error(request, "Please Enter Valid Data.")
         return render(request, self.template_name, {"form": form})
 
-
+@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required("vaccine.change_vaccine", raise_exception=True), name='dispatch')
 class VaccineUpdate(View):
     form_class = VaccineForm
     template_name = 'vaccine/vaccine-update.html'
@@ -74,7 +80,8 @@ class VaccineUpdate(View):
         messages.error(request, "Please Enter Valid Data.")
         return render(request, self.template_name, {"form": form})
 
-
+@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required("vaccine.delete_vaccine", raise_exception=True), name='dispatch')
 class VaccineDelete(View):
     template_name = "vaccine/vaccine-delete.html"
 

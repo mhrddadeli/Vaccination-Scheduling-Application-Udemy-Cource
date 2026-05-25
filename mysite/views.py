@@ -2,9 +2,6 @@ from django.shortcuts import render
 
 
 def index(request):
-    context = {
-        "message": "Hello my site."
-    }
-
-    return render(request, "mysite/index.html", context)
-
+    if request.user.is_authenticated:
+        return render(request, "mysite/dashboard.html", {"user": request.user})
+    return render(request, "mysite/index.html", {})
