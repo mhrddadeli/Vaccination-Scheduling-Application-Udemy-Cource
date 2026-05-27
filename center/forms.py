@@ -16,12 +16,9 @@ class CenterForm(ModelForm):
 class StorageForm(ModelForm):
     def __int__(self, *args, **kwargs):
         super(StorageForm, self).__int__(*args, **kwargs)
-
-        # following block is not working, no internet in iran, so I can't search why!!!
         self.fields["center"].queryset = Center.objects.filter(id=self.kwargs["center_id"])
         self.fields["center"].disabled = True
         self.fields["booked_quantity"].disabled = True
-
         for visible in self.visible_fields():
             visible.field.widget.attrs["class"] = "form-control"
 
