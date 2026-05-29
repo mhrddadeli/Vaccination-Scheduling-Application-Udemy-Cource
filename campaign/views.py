@@ -117,8 +117,6 @@ class SlotUpdateView(LoginRequiredMixin, PermissionRequiredMixin, SuccessMessage
         return kwargs
 
 
-
-
 class SlotDeleteView(LoginRequiredMixin, PermissionRequiredMixin, SuccessMessageMixin, generic.DeleteView):
     model = Slot
     permission_required = ("campaign.delete_slot",)
