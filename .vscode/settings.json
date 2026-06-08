@@ -1,8 +1,0 @@
-{
-  "python.pythonPath": "D:/django_basics/site/env",
-  "python.createEnvironment.contentButton": "show",
-  "python.globalModuleInstallation": true,
-  "python.missingPackage.severity": "Warning",
-  "python.terminal.activateEnvInCurrentTerminal": true,
-  "python.terminal.executeInFileDir": true
-}
