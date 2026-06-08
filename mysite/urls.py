@@ -24,6 +24,7 @@ from django.contrib.auth import views as authViews
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", views.index, name='index'),
+    path("dashboard/", views.dashboard, name='dashboard'),
     path("center/", include("center.urls", namespace='center')),
     path("vaccine/", include("vaccine.urls", namespace='vaccine')),
     path("campaign/", include("campaign.urls", namespace='campaign')),
